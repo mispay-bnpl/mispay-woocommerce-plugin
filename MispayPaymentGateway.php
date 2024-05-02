@@ -16,8 +16,9 @@ class WC_MisPay extends WC_Payment_Gateway
     public function __construct()
     {
 
+        $plugin_name = 'MISPay';
         $this->id = 'mispay';
-        $this->icon = 'https://cdn.mispay.co/widget/assets/logo.svg';
+        $this->icon = plugin_dir_url(__FILE__) . 'assets/logo.svg';
         $this->has_fields = true;
         $this->method_title = 'MISPay';
         $this->method_description = __('MISPay API integration for WooCommerce', 'mispay-woocommerce');
@@ -111,6 +112,8 @@ class WC_MisPay extends WC_Payment_Gateway
         $order = new WC_Order($order_id);
 
         $order->update_status('on-hold', __('Awaiting cheque payment', 'woocommerce'));
+        $order->update_meta_data('Payment_method', 'MISPay');
+        $order->save_meta_data();
         $startCheckout = $this->MisPayController->start_checkout($order->get_id(), $order->total);
         if ($startCheckout) {
             return array(
