@@ -1,0 +1,41 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: mispay-woocommerce\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-04-18 12:47+0000\n"
+"PO-Revision-Date: 2024-04-18 13:01+0000\n"
+"Last-Translator: \n"
+"Language-Team: Arabic (Saudi Arabia)\n"
+"Language: ar-SA\n"
+"Plural-Forms: nplurals=2; plural=n!=1;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Loco-Source-Locale: en_PT\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Parser: loco_parse_po"
+
+msgid "MISPay API integration for WooCommerce"
+msgstr "إضافة لنظام WooCommerce لدعم الدفع باستخدام إم آي إس باي"
+
+msgid "Enable/Disable"
+msgstr "تفعيل الخدمة"
+
+msgid "Enable MISPay"
+msgstr "تفعيل إم آي إس باي"
+
+msgid "Test mode"
+msgstr "الوضع التجريبي"
+
+msgid "Enable Test Mode"
+msgstr "تفعيل الوضع التجريبي"
+
+msgid "Place the payment gateway in test mode using test API keys."
+msgstr ""
+"عند تفعيل الوضع التجريبي، سوف يتم التواصل مع الخوادم التجريبية للاختبار"
+
+msgid "Payment was canceled"
+msgstr "تم إلغاء عملية الدفع"
+
+msgid "Timeout while processing payment."
+msgstr "انتهى الوقت المُحدد لإجراء عملية الدفع، يُرجى المحاولة مرة أُخرى"
