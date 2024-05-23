@@ -68,7 +68,17 @@ class WC_MisPay extends WC_Payment_Gateway
 
         if ($paymentStatus['result'] === 'success') {
             $this->MisPayController->end_checkout($paymentStatus['checkoutId']);
-            return wp_safe_redirect($checkout_url . 'order-received/' . $paymentStatus['orderId']);
+
+            $order_id = $paymentStatus['orderId'];
+            $base_url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . '/';
+
+            if (is_user_logged_in()) {
+                $redirect_url = $base_url . 'my-account/view-order/' . $order_id;
+            } else {
+                $redirect_url = $base_url . 'checkout/order-received/' . $order_id;
+            }
+            
+            return wp_safe_redirect($redirect_url);
         } else {
             wc_add_notice($paymentStatus['message'], 'error');
             return wp_safe_redirect($checkout_url);
