@@ -18,7 +18,6 @@ class WC_MisPay extends WC_Payment_Gateway
 
         $plugin_name = 'MISPay';
         $this->id = 'mispay';
-        $this->icon = plugin_dir_url(__FILE__) . 'assets/logo.svg';
         $this->has_fields = true;
         $this->method_title = 'MISPay';
         $this->method_description = __('MISPay API integration for WooCommerce', 'mispay-woocommerce');
@@ -33,9 +32,14 @@ class WC_MisPay extends WC_Payment_Gateway
 
         // Load the settings.
         $this->init_settings();
-        $this->title = $this->get_option('title');
+        $this->title = "MISPay";
+        $this->description = $this->get_option('description');    
         $this->enabled = $this->get_option('enabled');
         $this->testmode = 'yes' === $this->get_option('testmode');
+
+        if($this->get_option('showIcon') === 'yes') {
+            $this->icon = plugin_dir_url(__FILE__) . 'assets/logo.svg';
+        }
 
         $this->app_secret = $this->get_option('app_secret');
         $this->app_id = $this->get_option('app_id');
@@ -95,6 +99,19 @@ class WC_MisPay extends WC_Payment_Gateway
                 'type' => 'checkbox',
                 'description' => '',
                 'default' => 'no'
+            ),
+            'showIcon' => array(
+                'title' => __('MISPay Logo', 'mispay-woocommerce'),
+                'label' => __('Show/Hide', 'mispay-woocommerce'),
+                'type' => 'checkbox',
+                'description' => '',
+                'default' => 'no'
+            ),
+            'description' => array(
+                'title' => 'MISPay Checkout Description',
+                'type' => 'textarea',
+                'description' => 'Payment method description that the customer will see on your checkout.',
+                'default' => 'Pay with MISPay',
             ),
             'testmode' => array(
                 'title' => __('Test mode', 'mispay-woocommerce'),
