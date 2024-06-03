@@ -32,8 +32,12 @@ class WC_MisPay extends WC_Payment_Gateway
 
         // Load the settings.
         $this->init_settings();
-        $this->title = "MISPay";
-        $this->description = $this->get_option('description');    
+
+        $current_locale = get_locale();
+        $isArabic = (get_locale() === 'ar' || get_locale() === 'ar_SA');
+
+        $this->title = $isArabic ? $this->get_option('titleAR') : $this->get_option('titleEN');
+        $this->description = $isArabic ? $this->get_option('descriptionAR') : $this->get_option('descriptionEN');
         $this->enabled = $this->get_option('enabled');
         $this->testmode = 'yes' === $this->get_option('testmode');
 
@@ -107,11 +111,31 @@ class WC_MisPay extends WC_Payment_Gateway
                 'description' => '',
                 'default' => 'no'
             ),
-            'description' => array(
-                'title' => 'MISPay Checkout Description',
+            'titleEN' => array(
+                'title' => __('MISPay Title(English)', 'mispay-woocommerce'),
+                'label' => __('Title', 'mispay-woocommerce'),
+                'type' => 'textarea',
+                'description' => "Payment method title that the customer will see on your checkout.",
+                'default' => 'Buy now then pay it later with MISpay'
+            ),
+            'titleAR' => array(
+                'title' => __('MISPay Title(Arabic)', 'mispay-woocommerce'),
+                'label' => __('Title', 'mispay-woocommerce'),
+                'type' => 'textarea',
+                'description' => "Payment method title that the customer will see on your checkout.",
+                'default' =>  'اشتر الان وقسطها لاحقا مع MISpay'
+            ),
+            'descriptionEN' => array(
+                'title' => 'MISPay Description(English)',
                 'type' => 'textarea',
                 'description' => 'Payment method description that the customer will see on your checkout.',
-                'default' => 'Pay with MISPay',
+                'default' => 'Split your purchase into 3 interest-free payments, No late fees. sharia-compliant',
+            ),
+            'descriptionAR' => array(
+                'title' => 'MISPay Description(Arabic)',
+                'type' => 'textarea',
+                'description' => 'Payment method description that the customer will see on your checkout.',
+                'default' => 'قسم مشترياتك إلى 3 دفعات بدون فوائد، بدون رسوم تأخير متوافقة مع أحكام الشريعة الإسلامية',
             ),
             'testmode' => array(
                 'title' => __('Test mode', 'mispay-woocommerce'),
