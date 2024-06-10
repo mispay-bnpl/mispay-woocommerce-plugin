@@ -34,7 +34,7 @@ class WC_MisPay extends WC_Payment_Gateway
         $this->init_settings();
 
         $isArabic = (get_locale() === 'ar' || get_locale() === 'ar_SA');
-        
+
         $this->title = $isArabic ? $this->get_option('titleAR') : $this->get_option('titleEN');
         $this->description = $isArabic ? $this->get_option('descriptionAR') : $this->get_option('descriptionEN');
         $this->enabled = $this->get_option('enabled');
