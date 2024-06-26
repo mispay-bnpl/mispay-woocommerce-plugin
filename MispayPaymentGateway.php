@@ -54,7 +54,7 @@ class WC_MisPay extends WC_Payment_Gateway
         add_action('woocommerce_checkout_process', array($this, 'process_payment'));
         add_action('woocommerce_api_mispay-callback', array($this, 'handle_mispay_callback'));
     }
-
+    
 
     /*
 	* Registers our callbackURL to Wordpress as domain/wc-api/mispay-callback
@@ -94,47 +94,44 @@ class WC_MisPay extends WC_Payment_Gateway
 
     public function init_form_fields()
     {
-
         $this->form_fields = array(
+            'api_credentials' => array(
+                'title' => __('API Credentials', 'mispay-woocommerce'),
+                'type' => 'title',
+                'description' => __('Enter your API credentials to connect with MISPay services. App ID and App Secret will be provide by MISPay Team', 'mispay-woocommerce'),
+                'id' => 'api_credentials',
+            ),
+            'app_id' => array(
+                'title' => 'App ID',
+                'type' => 'text',
+                'description' => __('Enter your MISPay application ID. This is required to authenticate your store with MISPay.', 'mispay-woocommerce'),
+                'desc_tip' => true,
+            ),
+            'app_secret' => array(
+                'title' => 'App Secret',
+                'type' => 'password',
+                'description' => __('Enter your MISPay application secret. This is required to authenticate your store with MISPay securely.', 'mispay-woocommerce'),
+                'desc_tip' => true,
+            ),
+            'api_credentials_space' => array(
+                'type' => 'title',
+                'description' => '<br>',
+                'id' => 'api_credentials_space',
+            ),
+
+            'general_settings' => array(
+                'title' => __('General Settings', 'mispay-woocommerce'),
+                'type' => 'title',
+                'description' => __('Configure the general settings for MISPay.', 'mispay-woocommerce'),
+                'id' => 'general_settings'
+            ),
             'enabled' => array(
                 'title' => __('Enable/Disable', 'mispay-woocommerce'),
                 'label' => __('Enable MISPay', 'mispay-woocommerce'),
                 'type' => 'checkbox',
-                'description' => '',
-                'default' => 'no'
-            ),
-            'showIcon' => array(
-                'title' => __('MISPay Logo', 'mispay-woocommerce'),
-                'label' => __('Show/Hide', 'mispay-woocommerce'),
-                'type' => 'checkbox',
-                'description' => '',
-                'default' => 'yes'
-            ),
-            'titleEN' => array(
-                'title' => __('MISPay Title(English)', 'mispay-woocommerce'),
-                'label' => __('Title', 'mispay-woocommerce'),
-                'type' => 'textarea',
-                'description' => "Payment method title that the customer will see on your checkout.",
-                'default' => 'Buy now then pay it later with MISpay'
-            ),
-            'titleAR' => array(
-                'title' => __('MISPay Title(Arabic)', 'mispay-woocommerce'),
-                'label' => __('Title', 'mispay-woocommerce'),
-                'type' => 'textarea',
-                'description' => "Payment method title that the customer will see on your checkout.",
-                'default' =>  'اشتر الان وقسطها لاحقا مع MISpay'
-            ),
-            'descriptionEN' => array(
-                'title' => 'MISPay Description(English)',
-                'type' => 'textarea',
-                'description' => 'Payment method description that the customer will see on your checkout.',
-                'default' => 'Split your purchase into 3 interest-free payments, No late fees. sharia-compliant',
-            ),
-            'descriptionAR' => array(
-                'title' => 'MISPay Description(Arabic)',
-                'type' => 'textarea',
-                'description' => 'Payment method description that the customer will see on your checkout.',
-                'default' => 'قسم مشترياتك إلى 3 دفعات بدون فوائد، بدون رسوم تأخير متوافقة مع أحكام الشريعة الإسلامية',
+                'description' => __('Check this box to enable or disable the MISPay payment gateway.', 'mispay-woocommerce'),
+                'default' => 'no',
+                'desc_tip' => true,
             ),
             'testmode' => array(
                 'title' => __('Test mode', 'mispay-woocommerce'),
@@ -144,14 +141,83 @@ class WC_MisPay extends WC_Payment_Gateway
                 'default' => 'yes',
                 'desc_tip' => true,
             ),
-            'app_id' => array(
-                'title' => 'App ID',
-                'type' => 'text'
+            'showIcon' => array(
+                'title' => __('MISPay Logo', 'mispay-woocommerce'),
+                'label' => __('Show/Hide', 'mispay-woocommerce'),
+                'type' => 'checkbox',
+                'description' => __('Toggle to display or hide the MISPay logo at checkout.'),
+                'default' => 'yes',
+                'desc_tip' => true,
             ),
-            'app_secret' => array(
-                'title' => 'App Secret',
-                'type' => 'password'
-            )
+            'general_settings_space' => array(
+                'type' => 'title',
+                'description' => '<br>',
+                'id' => 'general_settings_space',
+            ),
+
+            'widget_settings' => array(
+                'title' => __('Widget Settings', 'mispay-woocommerce'),
+                'type' => 'title',
+                'description' => __('Configure the settings for the MISPay widget.', 'mispay-woocommerce'),
+                'id' => 'widget_settings'
+            ),
+            'enable_widget' => array(
+                'title' => __('Enable/Disable Widget', 'mispay-woocommerce'),
+                'label' => __('Enable MISPay Widget', 'mispay-woocommerce'),
+                'type' => 'checkbox',
+                'description' => __('Check this box to enable or disable the MISPay widget on your site.', 'mispay-woocommerce'),
+                'default' => 'yes',
+                'desc_tip' => true,
+            ),
+            'access_key' => array(
+                'title' => 'Access Key',
+                'type' => 'text',
+                'description' => 'Access key for MISPay widget authorization.',
+                'default' => '',
+                'desc_tip' => true,
+            ),
+            'widget_settings_space' => array(
+                'type' => 'title',
+                'description' => '<br>',
+                'id' => 'widget_settings_space',
+            ),
+
+            'title_description_settings' => array(
+                'title' => __('Title and Description Settings', 'mispay-woocommerce'),
+                'type' => 'title',
+                'description' => __('Customize the titles and descriptions for MISPay displayed on the checkout page.', 'mispay-woocommerce'),
+                'id' => 'title_description_settings'
+            ),
+            'titleEN' => array(
+                'title' => __('MISPay Title(English)', 'mispay-woocommerce'),
+                'label' => __('Title', 'mispay-woocommerce'),
+                'type' => 'textarea',
+                'description' => "Payment method title description that the customer will see on your checkout.",
+                'default' => 'Buy now then pay it later with MISpay',
+                'desc_tip' => true,
+            ),
+            'titleAR' => array(
+                'title' => __('MISPay Title(Arabic)', 'mispay-woocommerce'),
+                'label' => __('Title', 'mispay-woocommerce'),
+                'type' => 'textarea',
+                'description' => "Payment method title description that the customer will see on your checkout.",
+                'default' =>  'اشتر الان وقسطها لاحقا مع MISpay',
+                'desc_tip' => true,
+            ),
+            'descriptionEN' => array(
+                'title' => 'MISPay Description(English)',
+                'type' => 'textarea',
+                'description' => 'Payment method description that the customer will see on your checkout.',
+                'default' => 'Split your purchase into 3 interest-free payments, No late fees. sharia-compliant',
+                'desc_tip' => true,
+            ),
+            'descriptionAR' => array(
+                'title' => 'MISPay Description(Arabic)',
+                'type' => 'textarea',
+                'description' => 'Payment method description that the customer will see on your checkout.',
+                'default' => 'قسم مشترياتك إلى 3 دفعات بدون فوائد، بدون رسوم تأخير متوافقة مع أحكام الشريعة الإسلامية',
+                'desc_tip' => true,
+            ),
         );
     }
 
