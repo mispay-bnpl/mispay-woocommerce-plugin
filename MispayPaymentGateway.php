@@ -200,8 +200,7 @@ class WC_MisPay extends WC_Payment_Gateway
                 'title' => __('MISPay Title(Arabic)', 'mispay-woocommerce'),
                 'label' => __('Title', 'mispay-woocommerce'),
                 'type' => 'textarea',
-                'description' => "Payment method title
-                 that the customer will see on your checkout.",
+                'description' => "Payment method title that the customer will see on your checkout.",
                 'default' =>  'اشتر الان وقسطها لاحقا مع MISpay',
                 'desc_tip' => true,
             ),
