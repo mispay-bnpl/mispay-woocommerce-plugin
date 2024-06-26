@@ -54,7 +54,7 @@ class WC_MisPay extends WC_Payment_Gateway
         add_action('woocommerce_checkout_process', array($this, 'process_payment'));
         add_action('woocommerce_api_mispay-callback', array($this, 'handle_mispay_callback'));
     }
-    
+
 
     /*
 	* Registers our callbackURL to Wordpress as domain/wc-api/mispay-callback
@@ -192,7 +192,7 @@ class WC_MisPay extends WC_Payment_Gateway
                 'title' => __('MISPay Title(English)', 'mispay-woocommerce'),
                 'label' => __('Title', 'mispay-woocommerce'),
                 'type' => 'textarea',
-                'description' => "Payment method title description that the customer will see on your checkout.",
+                'description' => "Payment method title that the customer will see on your checkout.",
                 'default' => 'Buy now then pay it later with MISpay',
                 'desc_tip' => true,
             ),
@@ -200,7 +200,8 @@ class WC_MisPay extends WC_Payment_Gateway
                 'title' => __('MISPay Title(Arabic)', 'mispay-woocommerce'),
                 'label' => __('Title', 'mispay-woocommerce'),
                 'type' => 'textarea',
-                'description' => "Payment method title description that the customer will see on your checkout.",
+                'description' => "Payment method title
+                 that the customer will see on your checkout.",
                 'default' =>  'اشتر الان وقسطها لاحقا مع MISpay',
                 'desc_tip' => true,
             ),
