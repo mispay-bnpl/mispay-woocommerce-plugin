@@ -230,7 +230,7 @@ class WC_MisPay extends WC_Payment_Gateway
         $order->update_status('on-hold', __('Awaiting cheque payment', 'woocommerce'));
         $order->update_meta_data('Payment_method', 'MISPay');
         $order->save_meta_data();
-        $startCheckout = $this->MisPayController->start_checkout($order->get_id(), $order->total);
+        $startCheckout = $this->MisPayController->start_checkout($order->get_id(), $order->get_total());
         if ($startCheckout) {
             return array(
                 'result' => 'success',
