@@ -51,7 +51,6 @@ class WC_MisPay extends WC_Payment_Gateway
 
         add_action('init', array($this, 'register_mispay_callback_endpoint'));
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
-        add_action('woocommerce_checkout_process', array($this, 'process_payment'));
         add_action('woocommerce_api_mispay-callback', array($this, 'handle_mispay_callback'));
     }
 
