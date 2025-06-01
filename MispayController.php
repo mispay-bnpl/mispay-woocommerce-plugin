@@ -2,7 +2,7 @@
 
 class MisPayController
 {
-    private $SANDBOX_API_URL = 'https://api.mispay.co/sandbox/v1/api/';
+    private $SANDBOX_API_URL = 'https://api.sandbox.mispay.co/v1/api/';
     private $PROD_API_URL = 'https://api.mispay.co/v1/api/';
     private $API_URL;
     private $APP_ID;
