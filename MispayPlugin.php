@@ -46,7 +46,7 @@ function add_mispay_sdk_script() {
     $options = get_option('woocommerce_mispay_settings');
     if (!empty($options['access_key']) && $options['enable_widget'] === 'yes') {
         $testmode = !empty($options['testmode']) && $options['testmode'] === 'yes';
-        $widget_url = $testmode ? 'https://widget.mispay.co/sandbox/v1/sdk.js?authorize=' : 'https://widget.mispay.co/v1/sdk.js?authorize=';
+        $widget_url = $testmode ? 'https://widget.sandbox.mispay.co/v1/sdk.js?authorize=' : 'https://widget.mispay.co/v1/sdk.js?authorize=';
         echo '<script defer src="' . esc_url($widget_url . $options['access_key']) . '"></script>';
     }
 }
