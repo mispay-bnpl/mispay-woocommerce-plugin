@@ -1,5 +1,10 @@
 <?php
 
+// Prevent direct access
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 include_once('MispayController.php');
 
 
@@ -15,23 +20,37 @@ class WC_MisPay extends WC_Payment_Gateway
 
     public function __construct()
     {
-
         $plugin_name = 'MISPay';
         $this->id = 'mispay';
         $this->has_fields = true;
         $this->method_title = 'MISPay';
         $this->method_description = __('MISPay API integration for WooCommerce', 'mispay-woocommerce');
 
-
+        // Add support for more WooCommerce features
         $this->supports = array(
-            'products'
+            'products',
+            'refunds',
+            'subscriptions',
+            'subscription_cancellation',
+            'subscription_suspension',
+            'subscription_reactivation',
+            'subscription_amount_changes',
+            'subscription_date_changes',
+            'subscription_payment_method_change',
+            'subscription_payment_method_change_customer',
+            'subscription_payment_method_change_admin',
+            'multiple_subscriptions'
         );
-
 
         $this->init_form_fields();
 
         // Load the settings.
         $this->init_settings();
+
+        // Check if WooCommerce is active
+        if (!class_exists('WooCommerce')) {
+            return;
+        }
 
         $isArabic = (get_locale() === 'ar' || get_locale() === 'ar_SA');
 
@@ -46,6 +65,10 @@ class WC_MisPay extends WC_Payment_Gateway
 
         $this->app_secret = $this->get_option('app_secret');
         $this->app_id = $this->get_option('app_id');
+
+        if (empty($this->app_id) || empty($this->app_secret)) {
+            error_log('MISPay Error: App ID or App Secret is empty.');
+        }
 
         $this->MisPayController = new MisPayController($this->testmode, $this->app_id, $this->app_secret);
 
@@ -68,27 +91,71 @@ class WC_MisPay extends WC_Payment_Gateway
 	*/
     function handle_mispay_callback()
     {
-        $WCMisPay = new WC_MisPay();
-        $paymentStatus = $WCMisPay->handle_callback();
-        $checkout_url = wc_get_checkout_url();
+        $response = $_GET['_'];
 
-        if ($paymentStatus['result'] === 'success') {
-            $this->MisPayController->end_checkout($paymentStatus['checkoutId']);
-
-            $order_id = $paymentStatus['orderId'];
-            $base_url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . '/';
-
-            if (is_user_logged_in()) {
-                $redirect_url = $base_url . 'my-account/view-order/' . $order_id;
-            } else {
-                $redirect_url = $base_url . 'checkout/order-received/' . $order_id;
-            }
-            
-            return wp_safe_redirect($redirect_url);
-        } else {
-            wc_add_notice($paymentStatus['message'], 'error');
-            return wp_safe_redirect($checkout_url);
+        if (empty($response)) {
+            wc_add_notice(__('Invalid callback response.', 'mispay-woocommerce'), 'error');
+            wp_redirect(wc_get_checkout_url());
+            exit;
         }
+
+        $decodeResponse = $this->MisPayController->decrypt(base64_decode($response));
+        $order = wc_get_order($decodeResponse['orderId']);
+
+        if (!$order) {
+            wc_add_notice(__('Invalid order ID.', 'mispay-woocommerce'), 'error');
+            wp_redirect(wc_get_checkout_url());
+            exit;
+        }
+
+        // Log the callback received
+        $this->log_callback_response($order, $decodeResponse);
+
+        // Only use the decoded response to determine success/failure
+        if (isset($decodeResponse['code']) && $decodeResponse['code'] === 'MP00') {
+            // Update order status to 'Processing' for successful MISPay payments
+            $order->update_status('processing', __('MISPay payment completed successfully - order moved to processing.', 'mispay-woocommerce'));
+            wp_redirect($this->get_return_url($order));
+            exit;
+        } else {
+            $order->update_status('cancelled', __('Canceled', 'woocommerce'));
+            wc_add_notice(__('Payment failed or was canceled.', 'mispay-woocommerce'), 'error');
+            wp_redirect($order->get_cancel_order_url());
+            exit;
+        }
+    }
+
+    /**
+     * Log callback response to order meta
+     */
+    private function log_callback_response($order, $callback_data)
+    {
+        $log_entry = array(
+            'timestamp' => current_time('Y-m-d H:i:s'),
+            'status' => 'callback_received',
+            'message' => 'Callback received from MISPay',
+            'details' => array(
+                'code' => $callback_data['code'] ?? 'unknown',
+                'order_id' => $callback_data['orderId'] ?? 'unknown',
+                'checkout_id' => $callback_data['checkoutId'] ?? 'unknown',
+                'raw_data' => $callback_data
+            )
+        );
+        
+        // Get existing logs
+        $existing_logs = $order->get_meta('mispay_transaction_logs');
+        $logs = is_array($existing_logs) ? $existing_logs : array();
+        
+        // Add new log entry
+        $logs[] = $log_entry;
+        
+        // Keep only last 20 entries
+        if (count($logs) > 20) {
+            $logs = array_slice($logs, -20);
+        }
+        
+        $order->update_meta_data('mispay_transaction_logs', $logs);
+        $order->save();
     }
 
     public function init_form_fields()
@@ -222,25 +289,42 @@ class WC_MisPay extends WC_Payment_Gateway
 
     public function process_payment($order_id)
     {
+        $order = wc_get_order($order_id);
 
-        echo $this->app_id;
-        $order = new WC_Order($order_id);
+        if (!$order) {
+            error_log('MISPay Error: Invalid order ID in process_payment: ' . $order_id);
+            wc_add_notice(__('An error occurred while processing your payment.', 'mispay-woocommerce'), 'error');
+            return array(
+                'result' => 'failure',
+                'redirect' => wc_get_checkout_url()
+            );
+        }
 
-        $order->update_status('on-hold', __('Awaiting cheque payment', 'woocommerce'));
+        $order->update_status('pending', __('Pending payment', 'woocommerce'));
         $order->update_meta_data('Payment_method', 'MISPay');
         $order->save_meta_data();
-        $startCheckout = $this->MisPayController->start_checkout($order->get_id(), $order->get_total());
+        
+        $startCheckout = $this->MisPayController->start_checkout($order->get_id());
         if ($startCheckout) {
             return array(
                 'result' => 'success',
                 'redirect' => $startCheckout,
+            );
+        } else {
+            $order->update_status('failed', __('Failed to start checkout process', 'mispay-woocommerce'));
+
+            // Display a generic error message on the checkout page.
+            wc_add_notice(__('There was an error while processing your request. Please check any charges in your payment method and review your order history before placing an order again.', 'mispay-woocommerce'), 'error');
+            
+            return array(
+                'result' => 'failure',
+                'redirect' => wc_get_checkout_url()
             );
         }
     }
 
     public function handle_callback()
     {
-
         $response = $_GET['_'];
 
         if (empty($response)) {
@@ -252,7 +336,16 @@ class WC_MisPay extends WC_Payment_Gateway
 
         $decodeResponse = $this->MisPayController->decrypt(base64_decode($response));
 
-        $order = new WC_Order($decodeResponse['orderId']);
+        $order = wc_get_order($decodeResponse['orderId']);
+
+        if (!$order) {
+            error_log('MISPay Error: Invalid order ID in handle_callback: ' . $decodeResponse['orderId']);
+            return array(
+                'result' => 'failed',
+                'orderId' => null,
+                'message' => __('Invalid order ID', 'mispay-woocommerce')
+            );
+        }
 
         if (!isset($decodeResponse['code']) || $decodeResponse['code'] !== 'MP00') {
             $order->update_status('cancelled', __('Canceled', 'woocommerce'));
@@ -262,7 +355,8 @@ class WC_MisPay extends WC_Payment_Gateway
                 'message' => $decodeResponse['code'] === 'MP02' ? __('Payment was canceled', 'mispay-woocommerce') : __('Timeout while processing payment.', 'mispay-woocommerce')
             );
         } else {
-            $order->payment_complete();
+            // Update order status to 'Processing' for successful MISPay payments
+            $order->update_status('processing', __('MISPay payment completed successfully - order moved to processing.', 'mispay-woocommerce'));
             return array(
                 'result' => 'success',
                 'orderId' => $order->get_id(),
