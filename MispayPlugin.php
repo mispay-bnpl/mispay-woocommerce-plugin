@@ -793,3 +793,57 @@ function mispay_check_existing_orders_for_tracking() {
         error_log('MISPay: Triggered tracking for ' . $triggered_count . ' existing orders that needed tracking');
     }
 }
+
+// Register the MISPay webhook endpoint
+add_action('woocommerce_api_mispay-webhook', 'mispay_handle_webhook');
+
+function mispay_handle_webhook() {
+    $body = file_get_contents('php://input');
+    $data = json_decode($body, true);
+
+    if (isset($data['orderId']) && isset($data['code'])) {
+        $order = wc_get_order($data['orderId']);
+        if ($order) {
+            switch ($data['code']) {
+                case 'MP00':
+                    $order->update_status('processing', __('MISPay webhook: Payment successful.', 'mispay-woocommerce'));
+                    break;
+                case 'MP02':
+                    $order->update_status('cancelled', __('MISPay webhook: Payment cancelled.', 'mispay-woocommerce'));
+                    break;
+                default:
+                    $order->update_status('failed', __('MISPay webhook: Payment failed or unknown status.', 'mispay-woocommerce'));
+                    break;
+            }
+            $order->add_order_note('MISPay webhook received: ' . print_r($data, true));
+        }
+    }
+    status_header(200);
+    exit;
+}
+
+// Display the webhook URL in the admin panel with a copy button
+add_action('woocommerce_admin_field_mispay_webhook_url', 'mispay_display_webhook_url_field');
+function mispay_display_webhook_url_field($value) {
+    $webhook_url = home_url('/wc-api/mispay-webhook');
+    ?>
+    <tr valign="top">
+        <th scope="row">MISPay Webhook URL</th>
+        <td>
+            <input type="text" id="mispay-webhook-url" value="<?php echo esc_attr($webhook_url); ?>" readonly style="width: 400px;" />
+            <button type="button" class="button" onclick="navigator.clipboard.writeText(document.getElementById('mispay-webhook-url').value);">Copy</button>
+            <p class="description">Provide this URL to MISPay for real-time payment status updates.</p>
+        </td>
+    </tr>
+    <?php
+}
+
+// Add the webhook URL field to the MISPay settings
+add_filter('woocommerce_get_settings_checkout', function($settings, $current_section) {
+    if ($current_section === 'mispay') {
+        $settings[] = array(
+            'type' => 'mispay_webhook_url',
+        );
+    }
+    return $settings;
+}, 20, 2);
