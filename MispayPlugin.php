@@ -5,7 +5,7 @@
  * Description: MISPay API Integration
  * Author: MisPay
  * Author URI: https://mispay.co
- * Version: 1.0.2
+ * Version: 1.0.3
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * WC requires at least: 7.0
