@@ -274,14 +274,14 @@ class WC_MisPay extends WC_Payment_Gateway
                 'title' => 'MISPay Description(English)',
                 'type' => 'textarea',
                 'description' => 'Payment method description that the customer will see on your checkout.',
-                'default' => 'Split your purchase into 3 interest-free payments, No late fees. sharia-compliant',
+                'default' => 'Split your purchase into 4 interest-free payments, No late fees. sharia-compliant',
                 'desc_tip' => true,
             ),
             'descriptionAR' => array(
                 'title' => 'MISPay Description(Arabic)',
                 'type' => 'textarea',
                 'description' => 'Payment method description that the customer will see on your checkout.',
-                'default' => 'قسم مشترياتك إلى 3 دفعات بدون فوائد، بدون رسوم تأخير متوافقة مع أحكام الشريعة الإسلامية',
+                'default' => 'قسم مشترياتك إلى 4 دفعات بدون فوائد، بدون رسوم تأخير متوافقة مع أحكام الشريعة الإسلامية',
                 'desc_tip' => true,
             ),
         );
